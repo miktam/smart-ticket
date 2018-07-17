@@ -18,12 +18,13 @@ contract('Ticket', function ([ownerAddress, holderAddress, other]) {
   it('ticket should be issued by the owner', async function () {
     let ticketsIssued = await this.contract.ticketsIssued();
     ticketsIssued.should.be.bignumber.equal(0);
-    await this.contract.newTicket(holderAddress, '_appId', '_appKey', validInMinutes, {from: ownerAddress});
+    await this.contract.newTicket(holderAddress, '_appId', '_appKey', validInMinutes, { from: ownerAddress });
     let ticketsIssuedNow = await this.contract.ticketsIssued();
     ticketsIssuedNow.should.be.bignumber.equal(1);
   });
 
   it('if ticket issued by not authorized person - should throw', async function () {
-    await this.contract.newTicket(holderAddress, '_appId', '_appKey', validInMinutes, {from: holderAddress}).should.be.rejectedWith(EVMThrow);
+    await this.contract.newTicket(holderAddress, '_appId', '_appKey', validInMinutes,
+      { from: holderAddress }).should.be.rejectedWith(EVMThrow);
   });
 });
