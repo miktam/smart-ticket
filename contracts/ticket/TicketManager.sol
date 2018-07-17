@@ -1,4 +1,4 @@
-pragma solidity ^0.4.23;
+pragma solidity ^0.4.24;
 // solium-disable-next-line no-experimental
 pragma experimental ABIEncoderV2;
 
@@ -69,7 +69,6 @@ contract TicketManager is Ownable {
   * @dev only for demonstration purposes - can not be exposed via web3 yet: *   https://ethereum.stackexchange.com/questions/36229/invalid-solidity-type-tuple
   */
   function getTicket(uint index) public view returns (Ticket) {
-    require(index >= 0, "Index should be non negative");
     require(index < ticketsIssued, "Out of bound");
     return tickets[index];
   }
@@ -78,7 +77,6 @@ contract TicketManager is Ownable {
   * @dev is ticket valid (is in {Granted, InUse} state)
   */
   function isTicketValid(uint index) public view returns (bool) {
-    require(index >= 0, "Index should be non negative");
     require(index < ticketsIssued, "Out of bound");
     return tickets[index].state != State.Used;
   }
@@ -88,7 +86,6 @@ contract TicketManager is Ownable {
   * Constraint: set only by ticket holder
   */
   function setTicketInUse(uint index) public {
-    require(index >= 0, "Index should be non negative");
     require(index < ticketsIssued, "Out of bound");
     require(tickets[index].state == State.Granted, "Wrong transition");
     require(tickets[index].holder == msg.sender, "Caller is not a holder");
@@ -99,7 +96,6 @@ contract TicketManager is Ownable {
   * @dev is ticket in InUse state
   */
   function isTicketInUse(uint index) public view returns (bool) {
-    require(index >= 0, "Index should be non negative");
     require(index < ticketsIssued, "Out of bound");
     return tickets[index].state == State.InUse;
   }
