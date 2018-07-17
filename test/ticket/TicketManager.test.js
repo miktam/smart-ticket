@@ -66,4 +66,24 @@ contract('Ticket', function ([ownerAddress, holderAddress, other]) {
   it('getting ticket Valid state out of bound (higher) should revert', async function () {
     await this.contract.isTicketValid(100).should.be.rejectedWith(EVMThrow);
   });
+
+  it('ticket should be set in InUse state only by the ticket holder', async function () {
+    await this.contract.newTicket(holderAddress, '_appId', '_appKey', validInMinutes, { from: ownerAddress });
+    await this.contract.setTicketInUse(0, { from: holderAddress });
+    const ticketValid = await this.contract.isTicketInUse(0);
+    ticketValid.should.equal(true);
+  });
+
+  it('getting first ticket should pass when having one', async function () {
+    await this.contract.newTicket(holderAddress, '_appId', '_appKey', validInMinutes, { from: ownerAddress });
+    await this.contract.getTicket(0).should.not.be.rejectedWith(EVMThrow);
+  });
+
+  it('setting non existing ticket should revert - lower bound ', async function () {
+    await this.contract.setTicketInUse(-10, { from: holderAddress }).should.be.rejectedWith(EVMThrow);
+  });
+
+  it('setting non existing ticket should revert - higher bound', async function () {
+    await this.contract.setTicketInUse(0, { from: holderAddress }).should.be.rejectedWith(EVMThrow);
+  });
 });
