@@ -24,11 +24,22 @@ contract('Ticket', function ([ownerAddress, holderAddress, other]) {
 
     const ticketValid = await this.contract.isTicketValid(0);
     ticketValid.should.equal(true);
-    console.log(ticketValid);
   });
 
   it('if ticket issued by not authorized person - should throw', async function () {
     await this.contract.newTicket(holderAddress, '_appId', '_appKey', validInMinutes,
       { from: holderAddress }).should.be.rejectedWith(EVMThrow);
+  });
+
+  it('ticket should be set in InUse state only by the ticket holder', async function () {
+    await this.contract.newTicket(holderAddress, '_appId', '_appKey', validInMinutes, { from: ownerAddress });
+    await this.contract.setTicketInUse(0, { from: holderAddress });
+    const ticketValid = await this.contract.isTicketValid(0);
+    ticketValid.should.equal(true);
+  });
+
+  it('modifying the state by not holder should be prohibited', async function () {
+    await this.contract.newTicket(holderAddress, '_appId', '_appKey', validInMinutes, { from: ownerAddress });
+    await this.contract.setTicketInUse(0, { from: ownerAddress }).should.be.rejectedWith(EVMThrow);
   });
 });

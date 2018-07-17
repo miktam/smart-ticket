@@ -29,7 +29,7 @@ contract TicketManager is Ownable {
     State state;
   }
 
-  mapping(uint => Ticket) public ticketsHolder;
+  mapping(uint => Ticket) public tickets;
   uint256 public ticketsIssued = 0;
 
   /**
@@ -52,10 +52,10 @@ contract TicketManager is Ownable {
     address _holder, 
     string _appId,
     string _appKey, 
-    uint256 _validInMinutes) onlyOwner public returns (uint ticketID) 
+    uint256 _validInMinutes) public onlyOwner returns (uint ticketID) 
   {
     ticketID = ticketsIssued++;
-    ticketsHolder[ticketID] = Ticket(
+    tickets[ticketID] = Ticket(
       msg.sender, 
       _holder, 
       _validInMinutes, 
@@ -69,16 +69,39 @@ contract TicketManager is Ownable {
   * @dev only for demonstration purposes - can not be exposed via web3 yet: *   https://ethereum.stackexchange.com/questions/36229/invalid-solidity-type-tuple
   */
   function getTicket(uint index) public view returns (Ticket) {
-    require(index < ticketsIssued);
-    return ticketsHolder[index];
+    require(index >= 0, "Index should be non negative");
+    require(index < ticketsIssued, "Out of bound");
+    return tickets[index];
   }
 
   /**
   * @dev is ticket valid (is in {Granted, InUse} state)
   */
   function isTicketValid(uint index) public view returns (bool) {
-    require(index < ticketsIssued);
-    return ticketsHolder[index].state != State.Used;
+    require(index >= 0, "Index should be non negative");
+    require(index < ticketsIssued, "Out of bound");
+    return tickets[index].state != State.Used;
+  }
+
+  /**
+  * @dev sets ticket in InUse state
+  * Constraint: set only by ticket holder
+  */
+  function setTicketInUse(uint index) public {
+    require(index >= 0, "Index should be non negative");
+    require(index < ticketsIssued, "Out of bound");
+    require(tickets[index].state == State.Granted, "Wrong transition");
+    require(tickets[index].holder == msg.sender, "Caller is not a holder");
+    tickets[index].state = State.InUse;
+  }
+
+  /**
+  * @dev is ticket in InUse state
+  */
+  function isTicketInUse(uint index) public view returns (bool) {
+    require(index >= 0, "Index should be non negative");
+    require(index < ticketsIssued, "Out of bound");
+    return tickets[index].state == State.InUse;
   }
 
 }
