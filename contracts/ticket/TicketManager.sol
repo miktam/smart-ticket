@@ -42,7 +42,7 @@ contract TicketManager is Ownable {
   /**
    * @dev fallback function to accept funds
    */
-  function () public payable {}
+  function () external payable {}
 
   /**
    * @param _holder         address of the ticket holder
