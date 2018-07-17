@@ -24,6 +24,7 @@ contract TicketManager is Ownable {
     uint256 validInMinutes; // time validity of the ticket
     string appId;          
     string appKey;
+    State state;
   }
 
   mapping(uint => Ticket) public ticketsHolder;
@@ -42,7 +43,7 @@ contract TicketManager is Ownable {
    */
   function newTicket(address _holder, string _appId, string _appKey, uint256 _validInMinutes) onlyOwner public returns (uint ticketID) {
     ticketID = ticketsIssued++;
-    ticketsHolder[ticketID] = Ticket(msg.sender, _holder, _validInMinutes, _appId, _appKey);
+    ticketsHolder[ticketID] = Ticket(msg.sender, _holder, _validInMinutes, _appId, _appKey, State.Granted);
     return ticketID;
   }
 
