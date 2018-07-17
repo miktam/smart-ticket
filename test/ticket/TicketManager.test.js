@@ -34,12 +34,36 @@ contract('Ticket', function ([ownerAddress, holderAddress, other]) {
   it('ticket should be set in InUse state only by the ticket holder', async function () {
     await this.contract.newTicket(holderAddress, '_appId', '_appKey', validInMinutes, { from: ownerAddress });
     await this.contract.setTicketInUse(0, { from: holderAddress });
-    const ticketValid = await this.contract.isTicketValid(0);
+    const ticketValid = await this.contract.isTicketInUse(0);
     ticketValid.should.equal(true);
   });
 
   it('modifying the state by not holder should be prohibited', async function () {
     await this.contract.newTicket(holderAddress, '_appId', '_appKey', validInMinutes, { from: ownerAddress });
     await this.contract.setTicketInUse(0, { from: ownerAddress }).should.be.rejectedWith(EVMThrow);
+  });
+
+  it('getting ticket out of bound (lower) should revert', async function () {
+    await this.contract.getTicket(-1).should.be.rejectedWith(EVMThrow);
+  });
+
+  it('getting ticket out of bound (higher) should revert', async function () {
+    await this.contract.getTicket(100).should.be.rejectedWith(EVMThrow);
+  });
+
+  it('getting ticket InUse state using out of bound (lower) should revert', async function () {
+    await this.contract.isTicketInUse(-1).should.be.rejectedWith(EVMThrow);
+  });
+
+  it('getting ticket InUse state out of bound (higher) should revert', async function () {
+    await this.contract.isTicketInUse(100).should.be.rejectedWith(EVMThrow);
+  });
+
+  it('getting ticket Valid state using out of bound (lower) should revert', async function () {
+    await this.contract.isTicketValid(-1).should.be.rejectedWith(EVMThrow);
+  });
+
+  it('getting ticket Valid state out of bound (higher) should revert', async function () {
+    await this.contract.isTicketValid(100).should.be.rejectedWith(EVMThrow);
   });
 });
