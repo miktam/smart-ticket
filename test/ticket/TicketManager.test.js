@@ -89,6 +89,8 @@ contract('Ticket', function ([ownerAddress, holderAddress, other]) {
     await this.contract.newTicket(holderAddress, appId, appKey, validInMinutes, { from: ownerAddress });
     const ticketsPerUser = await this.contract.getTicketsPerUserNumber(holderAddress);
     ticketsPerUser.should.be.bignumber.equal(1);
+    const isTicketValid = await this.contract.isTicketValid(holderAddress, 0);
+    isTicketValid.should.equal(true);
   });
 
   it('initial amount of tickets is zero', async function () {

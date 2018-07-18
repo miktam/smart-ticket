@@ -112,6 +112,15 @@ contract TicketManager is Ownable {
     return ticketsPerPerson[add].length;
   }
 
+  /** 
+  * @dev check if ticket is valid
+  */
+  function isTicketValid(address user, uint index) public view returns (bool) {
+    require(ticketsPerPerson[user].length > index, "Out of bound");
+    return ticketsPerPerson[user][index].state == State.InUse ||
+      ticketsPerPerson[user][index].state == State.Granted;
+  }
+
   /**
   * @dev collect tickets per user
   */
