@@ -30,6 +30,9 @@ contract TicketManager is Ownable {
   }
 
   mapping(uint => Ticket) public tickets;
+  mapping(address => Ticket[]) public ticketsPerPerson;
+  address[] public users;
+
   uint256 public ticketsIssued = 0;
 
   /**
@@ -62,6 +65,8 @@ contract TicketManager is Ownable {
       _appId, 
       _appKey, 
       State.Granted);
+
+    addTicketForUser(_holder, tickets[ticketID]);
     return ticketID;
   }
 
@@ -98,6 +103,32 @@ contract TicketManager is Ownable {
   function isTicketInUse(uint index) public view returns (bool) {
     require(index < ticketsIssued, "Out of bound");
     return tickets[index].state == State.InUse;
+  }
+
+  /**
+  * @dev get number of tickets per user
+  */
+  function getTicketsPerUserNumber(address add) public view returns (uint) {
+    return ticketsPerPerson[add].length;
+  }
+
+  /** 
+  * @dev check if ticket is valid
+  */
+  function isTicketValid(address user, uint index) public view returns (bool) {
+    require(ticketsPerPerson[user].length > index, "Out of bound");
+    return ticketsPerPerson[user][index].state == State.InUse ||
+      ticketsPerPerson[user][index].state == State.Granted;
+  }
+
+  /**
+  * @dev collect tickets per user
+  */
+  function addTicketForUser(address user, Ticket t) private {
+    if (ticketsPerPerson[user].length == 0) {
+      users.push(user);
+    }
+    ticketsPerPerson[user].push(t);
   }
 
 }
