@@ -82,4 +82,17 @@ contract('Ticket', function ([ownerAddress, holderAddress, other]) {
     const balance = web3.eth.getBalance(this.contract.address);
     balance.should.be.bignumber.equal(amount);
   });
+
+  it('adding a ticket should be counted', async function () {
+    const ticketsPerUserInitial = await this.contract.getTicketsPerUserNumber(holderAddress);
+    ticketsPerUserInitial.should.be.bignumber.equal(0);
+    await this.contract.newTicket(holderAddress, appId, appKey, validInMinutes, { from: ownerAddress });
+    const ticketsPerUser = await this.contract.getTicketsPerUserNumber(holderAddress);
+    ticketsPerUser.should.be.bignumber.equal(1);
+  });
+
+  it('initial amount of tickets is zero', async function () {
+    const ticketsPerUserInitial = await this.contract.getTicketsPerUserNumber(ownerAddress);
+    ticketsPerUserInitial.should.be.bignumber.equal(0);
+  });
 });
