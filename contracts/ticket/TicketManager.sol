@@ -81,14 +81,6 @@ contract TicketManager is Ownable {
   }
 
   /**
-  * @dev is ticket valid (is in {Granted, InUse} state)
-  */
-  function isTicketValid(uint index) public view returns (bool) {
-    require(index < ticketsIssued, "Out of bound");
-    return tickets[index].state != State.Used;
-  }
-
-  /**
   * @dev sets ticket in InUse state
   * Constraint: set only by ticket holder
   */
@@ -150,12 +142,6 @@ contract TicketManager is Ownable {
     // solium-disable-next-line security/no-block-members
     t.startedUsing = block.timestamp;
     t.state = State.InUse;
-  }
-
-  function getTimestamp(address user, uint index) public view returns (uint) {
-    require(ticketsPerPerson[user].length > index, "Out of bound");
-    Ticket storage t = ticketsPerPerson[user][index];
-    return t.startedUsing;
   }
 
   /**

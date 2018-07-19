@@ -59,7 +59,7 @@ contract('Ticket', function ([ownerAddress, holderAddress, other]) {
   });
 
   it('getting ticket Valid state out of bound (higher) should revert', async function () {
-    await this.contract.isTicketValid(100).should.be.rejectedWith(EVMThrow);
+    await this.contract.isTicketValid(holderAddress, 100).should.be.rejectedWith(EVMThrow);
   });
 
   it('ticket should be set in InUse state only by the ticket holder', async function () {
