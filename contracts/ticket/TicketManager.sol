@@ -27,6 +27,7 @@ contract TicketManager is Ownable {
     string appId;          
     string appKey;
     State state;
+    uint256 startedUsing;
   }
 
   mapping(uint => Ticket) public tickets;
@@ -64,7 +65,8 @@ contract TicketManager is Ownable {
       _validInMinutes, 
       _appId, 
       _appKey, 
-      State.Granted);
+      State.Granted,
+      0);
 
     addTicketForUser(_holder, tickets[ticketID]);
     return ticketID;
@@ -94,6 +96,8 @@ contract TicketManager is Ownable {
     require(index < ticketsIssued, "Out of bound");
     require(tickets[index].state == State.Granted, "Wrong transition");
     require(tickets[index].holder == msg.sender, "Caller is not a holder");
+    // solium-disable-next-line security/no-block-members
+    tickets[index].startedUsing = block.timestamp;
     tickets[index].state = State.InUse;
   }
 
@@ -113,12 +117,45 @@ contract TicketManager is Ownable {
   }
 
   /** 
-  * @dev check if ticket is valid
+  * @dev check if ticket is valid. 
   */
   function isTicketValid(address user, uint index) public view returns (bool) {
     require(ticketsPerPerson[user].length > index, "Out of bound");
-    return ticketsPerPerson[user][index].state == State.InUse ||
-      ticketsPerPerson[user][index].state == State.Granted;
+    Ticket storage t = ticketsPerPerson[user][index];
+    return t.state == State.InUse || t.state == State.Granted;
+  }
+
+  /** 
+  * @dev check time constraints and invalidate the ticket if there is a need
+  */
+  function validateTicket(address user, uint index) public returns (bool) {
+    require(ticketsPerPerson[user].length > index, "Out of bound");
+    Ticket storage t = ticketsPerPerson[user][index];
+
+    // solium-disable-next-line security/no-block-members
+    uint256 elapsedTime = block.timestamp.sub(t.startedUsing);
+    if (elapsedTime > t.validInMinutes) {
+      t.state = State.Used;
+    }
+  }
+
+  /**
+  * @dev Holder should set ticket inUse to start using it
+  */
+  function setTicketInUsePerUser(address user, uint index) public {
+    require(ticketsPerPerson[user].length > index, "Out of bound");
+    Ticket storage t = ticketsPerPerson[user][index];
+    require(t.state == State.Granted, "Wrong transition");
+    require(t.holder == msg.sender, "Caller is not a holder");
+    // solium-disable-next-line security/no-block-members
+    t.startedUsing = block.timestamp;
+    t.state = State.InUse;
+  }
+
+  function getTimestamp(address user, uint index) public view returns (uint) {
+    require(ticketsPerPerson[user].length > index, "Out of bound");
+    Ticket storage t = ticketsPerPerson[user][index];
+    return t.startedUsing;
   }
 
   /**
