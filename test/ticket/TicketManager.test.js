@@ -1,3 +1,4 @@
+import increaseTime from '../helpers/increaseTime';
 const BigNumber = web3.BigNumber;
 
 require('chai')
@@ -26,7 +27,7 @@ contract('Ticket', function ([ownerAddress, holderAddress, other]) {
     const ticketsIssuedNow = await this.contract.ticketsIssued();
     ticketsIssuedNow.should.be.bignumber.equal(1);
 
-    const ticketValid = await this.contract.isTicketValid(0);
+    const ticketValid = await this.contract.isTicketValid(holderAddress, 0);
     ticketValid.should.equal(true);
   });
 
@@ -58,7 +59,7 @@ contract('Ticket', function ([ownerAddress, holderAddress, other]) {
   });
 
   it('getting ticket Valid state out of bound (higher) should revert', async function () {
-    await this.contract.isTicketValid(100).should.be.rejectedWith(EVMThrow);
+    await this.contract.isTicketValid(holderAddress, 100).should.be.rejectedWith(EVMThrow);
   });
 
   it('ticket should be set in InUse state only by the ticket holder', async function () {
@@ -96,5 +97,19 @@ contract('Ticket', function ([ownerAddress, holderAddress, other]) {
   it('initial amount of tickets is zero', async function () {
     const ticketsPerUserInitial = await this.contract.getTicketsPerUserNumber(ownerAddress);
     ticketsPerUserInitial.should.be.bignumber.equal(0);
+  });
+
+  it('ticket should be invalidated after enough time passes', async function () {
+    await this.contract.newTicket(holderAddress, appId, appKey, validInMinutes, { from: ownerAddress });
+    const ticketValid = await this.contract.isTicketValid(holderAddress, 0);
+    ticketValid.should.equal(true);
+
+    await this.contract.setTicketInUsePerUser(holderAddress, 0, { from: holderAddress });
+
+    increaseTime(validInMinutes + 1);
+    await this.contract.validateTicket(holderAddress, 0);
+
+    const ticketValidAgain = await this.contract.isTicketValid(holderAddress, 0);
+    ticketValidAgain.should.equal(false);
   });
 });

@@ -11,9 +11,13 @@ Reason to use is the ability to programatically (mathematically) ensure the outc
 - list paymements
 - list token usage
 
-## Use Cases
+## Use Case Scenario
 1. User aquires N amount of tokens
-2. Each token represents a timespan, token holder address, how it could be used, and if it was used or not
+2. Each token represents a timespan, token holder address, how it could be used, and if it was used or not (holds AppId, AppKey)
+Example: Alice gets 1 token, valid for 1 hour, for Application App. State of token is Granted
+3. User starts using an App. Prerequisite: App will check if user has enough tokens to do so (token has to be in Granted/InUse state)
+4. All tokens which are InUse will be invalidated based on the time validity (1h token will be invalid after 1h)
+5. User, to continue to use an App, should have enough tokens in InUse/Granted state
 
 ## Security
 Smart contracts are heavily influenced by [OpenZeppelin work](https://openzeppelin.org/api/docs/open-zeppelin.html) which focuses on community standards driven source code in Solidity. 
