@@ -28,6 +28,7 @@ contract TicketManager is Ownable {
     string appKey;
     State state;
     uint256 startedUsing;
+    uint256 globalIndex; // index in a tickets table
   }
 
   mapping(uint => Ticket) public tickets;
@@ -66,7 +67,8 @@ contract TicketManager is Ownable {
       _appId, 
       _appKey, 
       State.Granted,
-      0);
+      0,
+      ticketID - 1);
 
     addTicketForUser(_holder, tickets[ticketID]);
     return ticketID;
@@ -78,6 +80,18 @@ contract TicketManager is Ownable {
   function getTicket(uint index) public view returns (Ticket) {
     require(index < ticketsIssued, "Out of bound");
     return tickets[index];
+  }
+
+  /**
+  * @dev get all ticket ids for given user 
+  */
+  function getAllTicketsPerUser(address user) public view returns (uint256[]) {
+    Ticket[] storage ticketsPerUser = ticketsPerPerson[user];
+    uint256[] memory ids = new uint256[](ticketsPerUser.length);
+    for (uint i = 0; i<ticketsPerUser.length; i++) {
+      ids[i] = ticketsPerUser[i].globalIndex;
+    }
+    return ids;
   }
 
   /**
