@@ -112,4 +112,16 @@ contract('Ticket', function ([ownerAddress, holderAddress, other]) {
     const ticketValidAgain = await this.contract.isTicketValid(holderAddress, 0);
     ticketValidAgain.should.equal(false);
   });
+
+  it('adding a ticket should be counted per user', async function () {
+    const ticketsPerUserInitial = await this.contract.getAllTicketsPerUser(holderAddress);
+    ticketsPerUserInitial.length.should.be.bignumber.equal(0);
+    await this.contract.newTicket(holderAddress, appId, appKey, validInMinutes, { from: ownerAddress });
+    const ticketsPerUser = await this.contract.getAllTicketsPerUser(holderAddress);
+    ticketsPerUser.length.should.be.bignumber.equal(1);
+
+    await this.contract.newTicket(other, appId, appKey, validInMinutes, { from: ownerAddress });
+    const ticketsPerUserAfterAddingAnotherUsersTicket = await this.contract.getAllTicketsPerUser(holderAddress);
+    ticketsPerUserAfterAddingAnotherUsersTicket.length.should.be.bignumber.equal(1, 'Number of tickets for this user shoudl not change');
+  });
 });
