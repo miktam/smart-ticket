@@ -122,6 +122,7 @@ contract('Ticket', function ([ownerAddress, holderAddress, other]) {
 
     await this.contract.newTicket(other, appId, appKey, validInMinutes, { from: ownerAddress });
     const ticketsPerUserAfterAddingAnotherUsersTicket = await this.contract.getAllTicketsPerUser(holderAddress);
-    ticketsPerUserAfterAddingAnotherUsersTicket.length.should.be.bignumber.equal(1, 'Number of tickets for this user shoudl not change');
+    ticketsPerUserAfterAddingAnotherUsersTicket.length.should.be.bignumber.equal(1,
+      'Number of tickets for this user shoudl not change');
   });
 });
